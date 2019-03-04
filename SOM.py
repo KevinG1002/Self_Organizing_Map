@@ -1,10 +1,10 @@
-import matplotlib as plt
+import matplotlib.pyplot as plt
 import scipy
 import pandas as pd
 import numpy as np
 import math 
 import random
-
+from tabulate import tabulate
 random.seed(1)
 
 
@@ -37,24 +37,17 @@ def Weight_Vector_Matrix_Gen(Rows,Cols):
 	for i in range(Rows):
 		for k in range(Cols):
 			for j in range(13):
-				# for j in range(len(Weight_Vectors)):
 				t = float((random.randint(-10,10))/100)
-				# Weight_Vectors[j] = t
-			
 				Weight_Vector_Matrix_IN[i][k][j] = t
 	return Weight_Vector_Matrix_IN
 
 def dot_product_squared (input_col_vector, weights_col_vector):
-	# print(input_col_vector)
-	# print(weights_col_vector)
-	subtraction = np.subtract(input_col_vector, weights_col_vector)
 	
-	# print(len(subtraction),type(subtraction), subtraction.shape)
-	# print(subtraction, subtraction.transpose())
+	subtraction = np.subtract(input_col_vector, weights_col_vector)
 	squared = np.dot(subtraction.transpose(), subtraction)
 	return np.sqrt(squared)
 
-##TRAINING START
+
 def winner_neighbor_finder(Matrix,Winner_Pos, Rows_Len,Cols_Len, Radius):
 	x = Winner_Pos[0]
 	y = Winner_Pos[1]
@@ -124,7 +117,7 @@ def weight_updating(Weight_Vectors_Matrix, Winner_Vector, Winner_Vector_Pos, inp
 #initialisation of Animal Classes / Initialisation  of Animal Column Vectors
 
 
-SOM = Self_Organizing_Map(0,0,0.002)
+SOM = Self_Organizing_Map(0,0,0.00135)
 SOM.weights = Weight_Vector_Matrix_Gen(10,10)
 
 
@@ -225,16 +218,31 @@ for i in range(0, 10000):
 
 #	MODEL TESTING: FINDING WINNER
 
+
+
 Location_Map = np.zeros((10,10), dtype = object)
+
 for i in Animals: 
 	
 	Testing_Winner = Find_Winner(SOM.weights.shape[0],SOM.weights.shape[1],SOM.weights,i.col_vector)
-	
+
 	Target_Normal = np.linalg.norm(i.col_vector)
 	SOM_Normal = np.linalg.norm(SOM.weights[Testing_Winner])
 	print("Winner Vector Magnitude % Accuracy: " + str((1-(abs(Target_Normal - SOM_Normal)/Target_Normal))*100)+ "\n","Map Location: " + str(Testing_Winner) + "\n","Animal Mapped: " + str(i.name) + '\n'  )
 	
-	Location_Map[Testing_Winner] = i.name
+	
+	# Location_Map[Testing_Winner] = i.name
+	if Location_Map[Testing_Winner] != 0:
+		Location_Map[Testing_Winner] = Location_Map[Testing_Winner]+ " " + i.name
+	else :
+		Location_Map[Testing_Winner] = i.name
 
 
-print(Location_Map)
+
+f = open("Table.txt", "w+")
+
+
+Table = tabulate(Location_Map, tablefmt = 'fancy_grid')
+
+f.write(tabulate(Location_Map, tablefmt = 'fancy_grid'))
+f.close()
